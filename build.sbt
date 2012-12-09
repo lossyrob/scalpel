@@ -6,12 +6,14 @@ organization := "com.github.axel22"
 
 version := "0.2"
 
-scalaVersion := "2.10.0-RC3"
+scalaVersion := "2.10.0-RC5"
 
-resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+resolvers ++= Seq("Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+                 "Scala Test" at "http://www.scala-tools.org/repo-reloases/")
 
 libraryDependencies ++= List(
-  "org.scalatest" % "scalatest_2.10.0-RC2" % "1.8-B2",
+"org.scalatest" % "scalatest_2.10.0-RC5" % "2.0.M5-B1" % "test",
+  "org.reflections" % "reflections" % "0.9.5",
   "jfree" % "jfreechart" % "1.0.12",
   "org.apache.commons" % "commons-math3" % "3.0",
   "org.scala-tools.testing" % "test-interface" % "0.5",
@@ -20,11 +22,8 @@ libraryDependencies ++= List(
   "com.google.code.java-allocation-instrumenter" % "java-allocation-instrumenter" % "2.0",
   "com.google.code.findbugs" % "jsr305" % "1.3.9",
   "joda-time" % "joda-time" % "2.1",
-  "junit" % "junit" % "3.8.2"
+  "junit" % "junit" % "4.5" % "test"
 )
-
-
-
 
 
 publishMavenStyle := true
