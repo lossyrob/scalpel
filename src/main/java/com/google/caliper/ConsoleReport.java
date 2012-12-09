@@ -45,7 +45,7 @@ import java.util.Map.Entry;
  *     FormatterBenchmark       -0.0  26399 =============================
  * </pre>
  */
-final class ConsoleReport {
+final public class ConsoleReport {
 
   private static final int barGraphWidth = 30;
 
@@ -80,7 +80,7 @@ final class ConsoleReport {
       new EnumMap<MeasurementType, Integer>(MeasurementType.class);
   private boolean printScore;
 
-  ConsoleReport(Run run, Arguments arguments) {
+  public ConsoleReport(Run run, Arguments arguments) {
     this.run = run;
     unitMap.put(MeasurementType.TIME, arguments.getTimeUnit());
     unitMap.put(MeasurementType.INSTANCE, arguments.getInstanceUnit());
@@ -297,7 +297,7 @@ final class ConsoleReport {
     }
   }
 
-  void displayResults() {
+  public void displayResults() {
     printValues();
     System.out.println();
     printUninterestingVariables();

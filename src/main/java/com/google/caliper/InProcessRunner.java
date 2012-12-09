@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * Executes a benchmark in the current VM.
  */
-final class InProcessRunner {
+final public class InProcessRunner {
 
   public void run(String... args) {
     Arguments arguments = Arguments.parse(args);

@@ -3,8 +3,6 @@ package scalpel
 import org.scalameter._
 import org.scalameter.utils._
 
-import com.google.caliper._
-
 import org.scalatest.FunSpec
 import org.scalatest.ShouldMatchers
 
@@ -28,13 +26,6 @@ class RunnerSpec extends FunSpec with ShouldMatchers {
   }
 
   describe("run caliper") {
-    it("runs") { 
-      val arguments = Arguments.parse(args);
-
-      val scenarioSelection = new ScenarioSelection(arguments);
-
-      Result result = runOutOfProcess();
-      new ConsoleReport(result.getRun(), arguments).displayResults()
-    }
+    it("runs") { CaliperRunner.run() }
   }
 }

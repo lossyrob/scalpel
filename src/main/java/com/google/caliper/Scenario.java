@@ -37,8 +37,8 @@ import java.util.Set;
 public final class Scenario
     implements Serializable /* for GWT */  {
 
-  static final String VM_KEY = "vm";
-  static final String TRIAL_KEY = "trial";
+  static final public String VM_KEY = "vm";
+  static final public String TRIAL_KEY = "trial";
 
   private /*final*/ Map<String, String> variables;
 

@@ -84,7 +84,6 @@ class ScalaMeterFramework extends Framework {
     def isModule = true
     def superClassName = classOf[PerformanceTest].getName
   }
-
 }
 
 

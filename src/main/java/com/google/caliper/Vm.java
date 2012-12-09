@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.util.List;
 
-class Vm {
+public class Vm {
   public List<String> getVmSpecificOptions(MeasurementType type, Arguments arguments) {
     return ImmutableList.of();
   }

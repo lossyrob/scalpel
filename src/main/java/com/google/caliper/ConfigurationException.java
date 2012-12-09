@@ -19,13 +19,13 @@ package com.google.caliper;
 /**
  * Thrown upon occurrence of a configuration error.
  */
-final class ConfigurationException extends RuntimeException {
+final public class ConfigurationException extends RuntimeException {
 
-  ConfigurationException(String s) {
+  public ConfigurationException(String s) {
     super(s);
   }
 
-  ConfigurationException(Throwable cause) {
+  public ConfigurationException(Throwable cause) {
     super(cause);
   }
 
