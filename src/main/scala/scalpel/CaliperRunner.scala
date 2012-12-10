@@ -135,10 +135,18 @@ object CaliperRunner {
         memoryMeasurements, memoryEventLog)
   }
 
-  def measure(arguments:Arguments, scenarioSelection:ScenarioSelection,scenario:Scenario, measurementType:MeasurementType):MeasurementResult = {
-    val vm = new VmFactory().createVm(scenario)
+/*
+*
+*
+  *          CALL HERE! v      
+  *                     v
+  *                     v
+  *                     v
+  */                    
+
+def measure(arguments:Arguments, scenarioSelection:ScenarioSelection,scenario:Scenario, measurementType:MeasurementType):MeasurementResult = {
     // this must be done before starting the forked process on certain VMs
-    val processBuilder:ProcessBuilder = createCommand(arguments, scenarioSelection, scenario, vm, measurementType).redirectErrorStream(true)
+    val processBuilder:ProcessBuilder = createProcess(arguments, scenarioSelection, scenario, measurementType).redirectErrorStream(true)
     var timeProcess:Process = null
     try {
       timeProcess = processBuilder.start()
@@ -146,6 +154,7 @@ object CaliperRunner {
       case e:java.io.IOException => throw new RuntimeException("failed to start subprocess", e)
     }
 
+    // Create measurements based on results read from the process's input stream.
     var measurementSet:MeasurementSet = null
     val eventLog = new StringBuilder()
     var reader:InterleavedReader = null
@@ -183,13 +192,11 @@ object CaliperRunner {
     return new MeasurementResult(measurementSet, eventLog.toString());
   }
 
-  def createCommand(arguments:Arguments, scenarioSelection:ScenarioSelection, scenario:Scenario, vm:Vm, measurementType:MeasurementType):ProcessBuilder = {
+  def createProcess(arguments:Arguments, scenarioSelection:ScenarioSelection, scenario:Scenario, measurementType:MeasurementType):ProcessBuilder = {
+    val vm = new VmFactory().createVm(scenario)
+
     val workingDirectory:File = new File(System.getProperty("user.dir"))
 
-    // val classPath = System.getProperty("java.class.path")
-    // if (classPath == null || classPath.length() == 0) {
-    //   throw new IllegalStateException("java.class.path is undefined in " + System.getProperties())
-    // }
     val classPath = defaultClasspath
 
     val vmArgs:ImmutableList.Builder[String] = ImmutableList.builder()
@@ -199,8 +206,6 @@ object CaliperRunner {
       vmArgs.add("-javaagent:" + allocationJarFile)
     }
     vmArgs.addAll(vm.getVmSpecificOptions(measurementType, arguments))
-
-
 
     val vmParameters:java.util.Map[String, String] = scenario.getVariables(
         scenarioSelection.getVmParameterNames())

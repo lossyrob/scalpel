@@ -20,7 +20,7 @@ package object scalameter {
     }
   }
 
-  private[scalameter] object dyn {
+  object dyn {
     val initialContext = new MonadicDynVar(Context.topLevel)
     val log = new MonadicDynVar[Log](Log.Console)
     val events = new MonadicDynVar[Events](Events.None)
