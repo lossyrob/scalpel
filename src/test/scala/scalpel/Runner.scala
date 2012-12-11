@@ -10,5 +10,5 @@ class RunCaliper extends FunSpec with ShouldMatchers {
 
 @org.junit.runner.RunWith(classOf[org.scalatest.junit.JUnitRunner])
 class RunSM extends FunSpec with ShouldMatchers {
-  describe("run scalameter") { it("runs") { SMRunner.run() } }
+  describe("run scalameter") { it("runs") { SMRunner.run(LoopBenchmark) } }
 }

@@ -17,14 +17,14 @@ object SMRunner {
     files.mkString(":")
   }
 
-  def run() = {
+  def run(perfTest:PerformanceTest) = {
     val args = Array[String]()
     val testcp = computeClasspath
 
     for {
 //        _ <- dyn.log.using(complog)
 //        _ <- dyn.events.using(tievents)
-        _ <- dyn.initialContext.using(initialContext ++ Main.Configuration.fromCommandLineArgs(args).context + (Key.classpath -> testcp))
+        _ <- dyn.initialContext.using(initialContext ++ Seq((Key.verbose,false)) ++ Main.Configuration.fromCommandLineArgs(args).context + (Key.classpath -> testcp))
       } {
         val datestart = new java.util.Date
 
@@ -32,7 +32,7 @@ object SMRunner {
         LoopBenchmark.testbody.value.apply()
 
         val setuptree = DSL.setupzipper.value.result
-        val resulttree = LoopBenchmark.executor.run(setuptree.asInstanceOf[Tree[Setup[LoopBenchmark.SameType]]], LoopBenchmark.reporter, LoopBenchmark.persistor)
+        val resulttree = perfTest.executor.run(setuptree.asInstanceOf[Tree[Setup[LoopBenchmark.SameType]]], perfTest.reporter, perfTest.persistor)
         
         // Print results
         for(curve <- resulttree) {
@@ -44,7 +44,7 @@ object SMRunner {
         val dateend = new java.util.Date
         val datedtree = resulttree.copy(context = resulttree.context + (Key.reports.startDate -> datestart) + (Key.reports.endDate -> dateend))
 
-        LoopBenchmark.reporter.report(datedtree, LoopBenchmark.persistor)
+        perfTest.reporter.report(datedtree, LoopBenchmark.persistor)
     }
   }
 }

@@ -41,20 +41,31 @@ object CaliperRunner {
   }
 
   def run() = {
-      val args = Array[String]("--warmupMillis", "3000", 
-                               "--runMillis", "1000", 
-                               "--measurementType", "TIME", 
-                               "--marker", "//ZxJ/", 
-                               "scalpel.CaliperBenchmark")
+    val args = Array[String]("--warmupMillis", "3000", 
+                             "--runMillis", "1000", 
+                             "--measurementType", "TIME", 
+                             "--marker", "//ZxJ/", 
+                             "scalpel.CaliperBenchmark")
 
 
-      val arguments = Arguments.parse(args)
+    val arguments = Arguments.parse(args)
 
-      val scenarioSelection = new ScenarioSelection(arguments)
+    val scenarioSelection = new ScenarioSelection(arguments)
 
-      val result:Result = runOutOfProcess(arguments,scenarioSelection)
+    val result:Result = runOutOfProcess(arguments,scenarioSelection)
 
-      new ConsoleReport(result.getRun(), arguments).displayResults()
+    val run = result.getRun()
+    for(entry <- run.getMeasurements().entrySet()) {
+      val scenario = entry.getKey
+      val ms = entry.getValue().getMeasurementSet(MeasurementType.TIME)
+      val d = ms.medianRaw()
+      // for(x <- ms.getUnitNames.entrySet()) {
+      //   println(s"${x.getKey()} = ${x.getValue()}")
+      // }
+      println(s"Caliper measure time: ${d/1000000} ms")
+    }
+
+//      new ConsoleReport(result.getRun(), arguments).displayResults()
   }
 
   def runOutOfProcess(arguments:Arguments, scenarioSelection:ScenarioSelection):Result = {
@@ -86,7 +97,7 @@ object CaliperRunner {
 
   def beforeMeasurement(index:Int, total:Int, scenario:Scenario) = {
     val percentDone:Double = index.toDouble / total
-    println("%2.0f%% %s".format(percentDone * 100, scenario))
+//    println("%2.0f%% %s".format(percentDone * 100, scenario))
   }
 
   def afterMeasurement(memoryMeasured:Boolean, scenarioResult:ScenarioResult) = {
@@ -104,15 +115,13 @@ object CaliperRunner {
 
     val timeMeasurementSet:MeasurementSet = scenarioResult.getMeasurementSet(MeasurementType.TIME)
     val unit:String = ConsoleReport.UNIT_ORDERING.min(timeMeasurementSet.getUnitNames().entrySet()).getKey()
-    println(" %.2f %s; \u03C3=%.2f %s @ %d trials%s%n".format(timeMeasurementSet.medianUnits(),
-                      unit, timeMeasurementSet.standardDeviationUnits(), unit,
-                      timeMeasurementSet.getMeasurements().size(), memoryMeasurements))
+    // println(" %.2f %s; \u03C3=%.2f %s @ %d trials%s%n".format(timeMeasurementSet.medianUnits(),
+    //                   unit, timeMeasurementSet.standardDeviationUnits(), unit,
+    //                   timeMeasurementSet.getMeasurements().size(), memoryMeasurements))
   }
 
   def runScenario(arguments:Arguments, scenarioSelection:ScenarioSelection, scenario:Scenario):ScenarioResult = {
-    println("Caliper start measure")
     val timeMeasurementResult:MeasurementResult = measure(arguments, scenarioSelection, scenario, MeasurementType.TIME)
-    println("Caliper end measure")
 
     var allocationMeasurements:MeasurementSet = null
     var allocationEventLog:String = null
