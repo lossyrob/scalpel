@@ -36,6 +36,8 @@ publishTo <<= version { (v: String) =>
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
 
+scalacOptions ++= Seq("-deprecation","-feature")
+
 publishArtifact in Test := false
 
 pomIncludeRepository := { _ => false }

@@ -40,10 +40,15 @@ package object execution {
     }
 
     private def runJvm(ctx: Context) {
+
       val classpath = ctx.goe(Key.classpath, defaultClasspath)
+
       val flags = ctx.goe(Key.exec.jvmflags, "")
+
       val command = s"java -server $flags -cp $classpath ${classOf[Main].getName} ${tmpfile.getPath}"
+
       log.verbose(s"Starting new JVM: $command")
+
       command !;
     }
 

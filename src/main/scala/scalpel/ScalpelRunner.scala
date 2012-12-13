@@ -5,7 +5,7 @@ object ScalpelRunner {
   def run() = {
     val number_of_times = 5
     for(i <- 0 to number_of_times) {
-      CaliperRunner.run()
+      port.CaliperRunner.run()
       SMRunner.run(LoopBenchmark)
       SMRunner.run(LocalBenchmark)
     }

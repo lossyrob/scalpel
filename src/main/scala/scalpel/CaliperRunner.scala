@@ -1,4 +1,4 @@
-package scalpel
+package scalpel.port
 
 import com.google.caliper._
 import com.google.caliper.ConsoleReport
@@ -17,12 +17,7 @@ import java.util.regex.Pattern
 import java.io.InputStreamReader
 import java.io.File
 
-class MeasurementResult(measurements:MeasurementSet, eventLog:String) {
-  val _measurements = measurements
-  val _eventLog = eventLog
-  def getMeasurements() = _measurements
-  def getEventLog() = _eventLog
-}
+case class MeasurementResult(measurements:MeasurementSet, eventLogs:String) 
 
 object CaliperRunner {
   def ARGUMENT_SPLITTER:Splitter = Splitter.on(Pattern.compile("\\s+")).omitEmptyStrings();
@@ -41,7 +36,7 @@ object CaliperRunner {
   }
 
   def run() = {
-    val args = Array[String]("--warmupMillis", "3000", 
+     val args = Array[String]("--warmupMillis", "3000", 
                              "--runMillis", "1000", 
                              "--measurementType", "TIME", 
                              "--marker", "//ZxJ/", 
@@ -121,7 +116,7 @@ object CaliperRunner {
   }
 
   def runScenario(arguments:Arguments, scenarioSelection:ScenarioSelection, scenario:Scenario):ScenarioResult = {
-    val timeMeasurementResult:MeasurementResult = measure(arguments, scenarioSelection, scenario, MeasurementType.TIME)
+    val timeMeasurementResult:MeasurementResult = measure(CaliperSetup(arguments, scenarioSelection, scenario, MeasurementType.TIME))
 
     var allocationMeasurements:MeasurementSet = null
     var allocationEventLog:String = null
@@ -129,17 +124,17 @@ object CaliperRunner {
     var memoryEventLog:String = null
 
     if (arguments.getMeasureMemory()) {
-      val allocationsMeasurementResult:MeasurementResult = measure(arguments, scenarioSelection, scenario, MeasurementType.INSTANCE)
-      allocationMeasurements = allocationsMeasurementResult.getMeasurements()
-      allocationEventLog = allocationsMeasurementResult.getEventLog()
+      val allocationsMeasurementResult:MeasurementResult = measure(CaliperSetup(arguments, scenarioSelection, scenario, MeasurementType.INSTANCE))
+      allocationMeasurements = allocationsMeasurementResult.measurements
+      allocationEventLog = allocationsMeasurementResult.eventLogs
 
-      val memoryMeasurementResult:MeasurementResult = measure(arguments, scenarioSelection, scenario, MeasurementType.MEMORY)
-      memoryMeasurements = memoryMeasurementResult.getMeasurements()
-      memoryEventLog = memoryMeasurementResult.getEventLog()
+      val memoryMeasurementResult:MeasurementResult = measure(CaliperSetup(arguments, scenarioSelection, scenario, MeasurementType.MEMORY))
+      memoryMeasurements = memoryMeasurementResult.measurements
+      memoryEventLog = memoryMeasurementResult.eventLogs
     }
 
-    return new ScenarioResult(timeMeasurementResult.getMeasurements(),
-        timeMeasurementResult.getEventLog(),
+    return new ScenarioResult(timeMeasurementResult.measurements,
+        timeMeasurementResult.eventLogs,
         allocationMeasurements, allocationEventLog,
         memoryMeasurements, memoryEventLog)
   }
@@ -153,9 +148,10 @@ object CaliperRunner {
   *                     v
   */                    
 
-def measure(arguments:Arguments, scenarioSelection:ScenarioSelection,scenario:Scenario, measurementType:MeasurementType):MeasurementResult = {
+def measure(setup:CaliperSetup):MeasurementResult = {
     // this must be done before starting the forked process on certain VMs
-    val processBuilder:ProcessBuilder = createProcess(arguments, scenarioSelection, scenario, measurementType).redirectErrorStream(true)
+    val processBuilder:ProcessBuilder = createProcess(setup.arguments, setup.scenarioSelection, 
+                                                      setup.scenario, setup.measurementType).redirectErrorStream(true)
     var timeProcess:Process = null
     try {
       timeProcess = processBuilder.start()
@@ -168,7 +164,7 @@ def measure(arguments:Arguments, scenarioSelection:ScenarioSelection,scenario:Sc
     val eventLog = new StringBuilder()
     var reader:InterleavedReader = null
     try {
-      reader = new InterleavedReader(arguments.getMarker(),
+      reader = new InterleavedReader(setup.arguments.getMarker(),
                                      new InputStreamReader(timeProcess.getInputStream()))
       var o:Object = reader.read()
       while (o != null) {
