@@ -7,7 +7,7 @@ import collection._
 import compat.Platform
 import utils.Tree
 
-
+import scalpel._
 
 /** Runs warmups until the maximum number of warmups is done,
  *  or the running times have stabilized. After that, it runs
@@ -85,7 +85,7 @@ class LocalExecutor(val warmer: Executor.Warmer, val aggregator: Aggregator, val
       measurements += Measurement(processedTime, params, data)
     }
 
-    CurveData(measurements, Map.empty, context)
+    CurveData(measurements, Map.empty, context,Seq[Result]())
   }
 
   override def toString = s"LocalExecutor(${aggregator.name}, ${measurer.name})"

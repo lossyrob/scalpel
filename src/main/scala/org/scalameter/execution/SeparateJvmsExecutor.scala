@@ -8,7 +8,7 @@ import collection._
 import sys.process._
 import utils.Tree
 
-
+import scalpel._
 
 /** Runs multiple JVM instances per each setup and aggregates all the results together.
  *
@@ -100,7 +100,7 @@ class SeparateJvmsExecutor(val warmer: Executor.Warmer, val aggregator: Aggregat
       )
     }
 
-    CurveData(measurements.toSeq, Map.empty, context)
+    CurveData(measurements.toSeq, Map.empty, context,Seq[Result]())
   }
 
   override def toString = s"MultipleJvmPerSetupExecutor(${aggregator.name}, ${measurer.name})"

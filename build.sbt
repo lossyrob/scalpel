@@ -9,7 +9,8 @@ version := "0.2"
 scalaVersion := "2.10.0-RC5"
 
 resolvers ++= Seq("Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-                 "Scala Test" at "http://www.scala-tools.org/repo-reloases/")
+                 "Scala Test" at "http://www.scala-tools.org/repo-reloases/",
+                 "spray" at "http://repo.spray.io/")
 
 libraryDependencies ++= List(
 "org.scalatest" % "scalatest_2.10.0-RC5" % "2.0.M5-B1" % "test",
@@ -22,7 +23,9 @@ libraryDependencies ++= List(
   "com.google.code.java-allocation-instrumenter" % "java-allocation-instrumenter" % "2.0",
   "com.google.code.findbugs" % "jsr305" % "1.3.9",
   "joda-time" % "joda-time" % "2.1",
-  "junit" % "junit" % "4.5" % "test"
+  "junit" % "junit" % "4.5" % "test",
+  "net.liftweb" % "lift-json_2.10.0-RC2" % "2.5-SNAPSHOT" from "http://n0d.es/jars/lift-json_2.10.0-RC2.jar",
+  "com.thoughtworks.paranamer" % "paranamer" % "2.4.1"
 )
 
 

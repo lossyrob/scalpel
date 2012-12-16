@@ -6,7 +6,7 @@ import java.util.Date
 import collection._
 import scala.util.DynamicVariable
 
-
+import scalpel._
 
 package object scalameter {
 
@@ -234,10 +234,10 @@ package scalameter {
     case class Data(complete: Seq[Double], success: Boolean)
   }
 
-  case class CurveData(measurements: Seq[Measurement], info: Map[String, Any], context: Context)
+  case class CurveData(measurements: Seq[Measurement], info: Map[String, Any], context: Context,results:Seq[Result])
 
   object CurveData {
-    def empty = CurveData(Seq(), Map(), initialContext)
+    def empty = CurveData(Seq(), Map(), initialContext, Seq[Result]())
   }
 
   @SerialVersionUID(-2666789428423525666L)

@@ -45,8 +45,7 @@ object LocalBenchmark extends PerformanceTest {
 
   /* configuration */
 
-//  lazy val executor = LocalExecutor(new Executor.Warmer.Default, Aggregator.min, new Measurer.Default)
-  lazy val executor = new CaliperExecutor()
+  lazy val executor = LocalExecutor(new Executor.Warmer.Default, Aggregator.min, new Measurer.Default)
   lazy val reporter = Reporter.None
   lazy val persistor = Persistor.None
 

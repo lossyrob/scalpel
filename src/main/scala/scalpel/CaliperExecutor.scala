@@ -2,7 +2,6 @@ package scalpel
 import scalpel.Functional._
 
 import org.scalameter
-//import org.scalameter.utils._
 
 class CaliperExecutor() extends scalameter.Executor {
   def translateSetup[T](setup:scalameter.Setup[T]):port.CaliperSetup = {
@@ -11,12 +10,13 @@ class CaliperExecutor() extends scalameter.Executor {
   }
 
   def runSetup[T](setup: scalameter.Setup[T]): scalameter.CurveData = {
-    println(" RUNNING SETUP ")
-    setup |> translateSetup |> port.CaliperRunner.measure |> translateData
+    println("[TRANSLATION]: SETUP")
+    setup |> translateSetup |> port.SetupRunner.measure |> translateData
   }
 
   def translateData(measurementResult:port.MeasurementResult):scalameter.CurveData = {
     import MeasurementTranslator._   
-    translate(measurementResult.measurements)            
+    println("[TRANSLATION]: RESULTS")
+    translate(measurementResult.measurements)
   }
 }

@@ -45,4 +45,5 @@ public class LinearTranslation {
   public double translate(double in) {
     return m * in + b;
   }
+
 }
