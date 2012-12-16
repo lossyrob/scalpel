@@ -1,5 +1,7 @@
 package scalpel
 
+import stats._
+
 case class Result(raw:Double)
 
 trait ResultOrdering extends scala.math.Ordering[Result] {

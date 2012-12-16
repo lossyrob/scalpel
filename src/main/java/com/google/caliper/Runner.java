@@ -354,7 +354,7 @@ public final class Runner {
 
   private void debug() {
     try {
-      int debugReps = arguments.getDebugReps();
+        int debugReps = arguments.getDebugReps();
       InProcessRunner runner = new InProcessRunner();
       DebugMeasurer measurer = new DebugMeasurer(debugReps);
       for (Scenario scenario : scenarioSelection.select()) {

@@ -90,13 +90,7 @@ public abstract class SimpleBenchmark
     }
   }
 
-  @Override public ConfiguredBenchmark createBenchmark(Map<String, String> parameterValues) {
-    if (!parameterNames().equals(parameterValues.keySet())) {
-      throw new IllegalArgumentException("Invalid parameters specified. Expected "
-          + parameterNames() + " but was " + parameterValues.keySet());
-    }
-
-    String methodName = parameterValues.get("benchmark");
+    @Override public ConfiguredBenchmark createBenchmark(String methodName) {
     final Method method = methods.get(methodName);
     if (method == null) {
       throw new IllegalArgumentException("Invalid parameters specified. \"time" + methodName + "\" "
@@ -107,16 +101,16 @@ public abstract class SimpleBenchmark
       @SuppressWarnings({"ClassNewInstance"}) // can throw any Exception, so we catch all Exceptions
       final SimpleBenchmark copyOfSelf = getClass().newInstance();
 
-      for (Map.Entry<String, String> entry : parameterValues.entrySet()) {
-        String parameterName = entry.getKey();
-        if ("benchmark".equals(parameterName)) {
-          continue;
-        }
+      // for (Map.Entry<String, String> entry : parameterValues.entrySet()) {
+      //   String parameterName = entry.getKey();
+      //   if ("benchmark".equals(parameterName)) {
+      //     continue;
+      //   }
 
-        Parameter<?> parameter = parameters.get(parameterName);
-        Object value = TypeConverter.fromString(entry.getValue(), parameter.getType());
-        parameter.set(copyOfSelf, value);
-      }
+      //   Parameter<?> parameter = parameters.get(parameterName);
+      //   Object value = TypeConverter.fromString(entry.getValue(), parameter.getType());
+      //   parameter.set(copyOfSelf, value);
+      // }
       copyOfSelf.setUp();
 
       return new ConfiguredBenchmark(copyOfSelf) {

@@ -5,7 +5,7 @@ import com.google.caliper.ScenarioSelection
 import com.google.caliper.Scenario
 import com.google.caliper.MeasurementSet
 import com.google.caliper.MeasurementType
-import com.google.caliper.InProcessRunner
+import com.google.caliper/*.InProcessRunner*/
 
 import java.io.File
 import java.io.IOException
@@ -37,40 +37,35 @@ object SetupRunner {
     JsonConversion.getMeasurementSet(s)
   }
 
-  def measure(setup:CaliperSetup):MeasurementResult = {
-    val arguments = setup.arguments
-    val scenario = setup.scenario
-    val scenarioSelection = setup.scenarioSelection
+  def measure(setup:CaliperSetup,benchmarkName:String):MeasurementResult = {
     val eventLog = new StringBuilder()
 
     var measurementSet:MeasurementSet = null
 
     val reader = new InterleavedReader {
-      def log(s:String) = eventLog.append(s)
+      def log(s:String) = eventLog.append(s+"\n")
       def handleJson(s:String) = {
         measurementSet = parseJson(s)
       }
     }
 
-    val caliperArgs = mutable.ListBuffer("--warmupMillis",arguments.getWarmupMillis().toLong.toString,
-                                         "--runMillis",arguments.getRunMillis().toLong.toString,
-                                         "--measurementType",MeasurementType.TIME.toString(),
-                                         "--marker",reader.marker)
-
-    for(entry <- scenario.getVariables(scenarioSelection.getUserParameterNames()).entrySet()) {
-      caliperArgs.append("-D" + entry.getKey() + "=" + entry.getValue())
-    }
-
-    caliperArgs.add(arguments.getSuiteClassName())
+    var caliperArgs = Seq("--warmupMillis",setup.warmupTime.toString,
+                          "--runMillis",setup.runTime.toLong.toString,
+                          "--measurementType",MeasurementType.TIME.toString(),
+                          "--marker",reader.marker,
+                          "-Dbenchmarks=$benchmarkName",
+                          setup.suiteClassName)
 
     val (cmd,rc) = try {
       JavaRunner.run(defaultClasspath,
-                     classOf[InProcessRunner].getName,
+                     "scalpel.port.InProcessRunner", // TODO: Use reflection to get the name
                      caliperArgs)(reader.readLine)
     } catch {
       case e:java.io.IOException => throw new RuntimeException("failed to start subprocess", e)
     }
 
+    println(s"\n${eventLog.toString}")
+    
     if (measurementSet == null) {
       val message = s"Failed to execute ${cmd}" 
       System.err.println("  " + message)

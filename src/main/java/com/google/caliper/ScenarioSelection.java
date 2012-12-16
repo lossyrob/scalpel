@@ -114,7 +114,8 @@ public final class ScenarioSelection {
   }
 
   public ConfiguredBenchmark createBenchmark(Scenario scenario) {
-    return suite.createBenchmark(scenario.getVariables(getUserParameterNames()));
+      String bm = scenario.getVariables(getUserParameterNames()).get("benchmark");
+      return suite.createBenchmark(bm);
   }
 
   private void prepareSuite() {

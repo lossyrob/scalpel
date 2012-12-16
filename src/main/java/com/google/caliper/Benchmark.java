@@ -28,7 +28,7 @@ public interface Benchmark {
 
   Set<String> parameterValues(String parameterName);
 
-  ConfiguredBenchmark createBenchmark(Map<String, String> parameterValues);
+  ConfiguredBenchmark createBenchmark(String methodName);
 
   /**
    * A mapping of units to their values. Their values must be integers, but all values are relative,

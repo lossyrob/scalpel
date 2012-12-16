@@ -1,30 +1,37 @@
 package scalpel.port
 
-import com.google.caliper._
+import com.google.caliper.Benchmark
+import com.google.caliper.ConfiguredBenchmark
+
 import org.scalameter._
 
 import scala.collection.JavaConversions._
 
 /* Caliper data type */
 
-case class CaliperSetup(arguments:Arguments,scenarioSelection:ScenarioSelection,
-                        scenario:Scenario,measurementType:MeasurementType) {
-  def suiteClassName = arguments.getSuiteClassName()
+class CaliperSetup {
+  def suiteClassName = "scalpel.CaliperBenchmark"
+  def warmupTime:Long = 3000
+  def runTime:Long = 1000
+  def trial = 1
+
+  def benchmark:ConfiguredBenchmark = 
+    if(benchmarkNames.length != 1)
+      sys.error("Benchmarks cannot be created off of a setup with multiple benchmark names")
+    else
+      getBenchmark(benchmarkNames(0))
+
+  def getBenchmark(name:String):ConfiguredBenchmark = 
+    Activator.createInstance[Benchmark](suiteClassName)
+             .createBenchmark("IntArrayWhileLoop")
+
+  def benchmarkNames = Seq[String]("IntArrayWhileLoop")
 }
 
 object CaliperSetup {
-  val Default = defaultCaliperSetup
+  val Default = new CaliperSetup()
 
-  def defaultCaliperSetup:CaliperSetup = {
-    val args = Array[String]("--warmupMillis", "3000", 
-                             "--runMillis", "1000", 
-                             "--measurementType", "TIME", 
-                             "--marker", "//ZxJ/", 
-                             "scalpel.CaliperBenchmark")
-    val arguments = Arguments.parse(args)
-    val scenarioSelection = new ScenarioSelection(arguments)
-    val scenario = scenarioSelection.select()(0)
-    val measurementType = MeasurementType.TIME
-    CaliperSetup(arguments,scenarioSelection,scenario,measurementType)
+  def fromArgs(args:Seq[String]):CaliperSetup = {
+    Default
   }
 }

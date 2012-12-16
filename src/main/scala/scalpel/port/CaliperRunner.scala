@@ -1,8 +1,8 @@
 package scalpel.port
 
-import com.google.caliper._
 import com.google.caliper.ConsoleReport
 import com.google.caliper.UserException.ExceptionFromUserCodeException
+import com.google.caliper.MeasurementSet
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableList
 import com.google.common.base.Splitter
@@ -35,23 +35,11 @@ object CaliperRunner {
   }
 
   def run() = {
-     val args = Array[String]("--warmupMillis", "3000", 
-                             "--runMillis", "1000", 
-                             "--measurementType", "TIME", 
-                             "--marker", "//ZxJ/", 
-                             "scalpel.CaliperBenchmark")
+    val result = runOutOfProcess(CaliperSetup.Default)
 
-
-    val arguments = Arguments.parse(args)
-
-    val scenarioSelection = new ScenarioSelection(arguments)
-
-    val result:Result = runOutOfProcess(arguments,scenarioSelection)
-
-    val run = result.getRun()
-    for(entry <- run.getMeasurements().entrySet()) {
-      val scenario = entry.getKey
-      val ms = entry.getValue().getMeasurementSet(MeasurementType.TIME)
+    val run = result.run
+    for((benchmark,result) <- run.results) {
+      val ms = result.measurementSet
       val d = ms.medianRaw()
       // for(x <- ms.getUnitNames.entrySet()) {
       //   println(s"${x.getKey()} = ${x.getValue()}")
@@ -62,26 +50,24 @@ object CaliperRunner {
 //      new ConsoleReport(result.getRun(), arguments).displayResults()
   }
 
-  def runOutOfProcess(arguments:Arguments, scenarioSelection:ScenarioSelection):Result = {
+  def runOutOfProcess(setup:CaliperSetup):CaliperResult = {
     val executedDate = new Date()
-    val resultsBuilder:ImmutableMap.Builder[Scenario, ScenarioResult] = ImmutableMap.builder()
+    var results = Map[String,BenchmarkResult]()
 
     try {
-      val scenarios = scenarioSelection.select()
-
       var i = 0
-      for (scenario <- scenarios) {
+      for (benchmarkName <- setup.benchmarkNames) {
         i += 1
-        beforeMeasurement(i, scenarios.size(), scenario)
-        val scenarioResult:ScenarioResult = runScenario(arguments, scenarioSelection, scenario)
-        afterMeasurement(arguments.getMeasureMemory(), scenarioResult)
-        resultsBuilder.put(scenario, scenarioResult)
+        beforeMeasurement(i, setup.benchmarkNames.length, benchmarkName)
+        val scenarioResult:BenchmarkResult = runScenario(setup,benchmarkName)
+        afterMeasurement(scenarioResult)
+        results = results + ((benchmarkName, scenarioResult))
       }
       println()
 
-      val environment:Environment = new EnvironmentGetter().getEnvironmentSnapshot()
-      return new Result(
-        new Run(resultsBuilder.build(), arguments.getSuiteClassName(), executedDate),
+      val environment = Environment.getEnvironmentSnapshot()
+      return new CaliperResult(
+        new Run(results, setup.suiteClassName, executedDate), 
         environment)
     } catch {
       case e:Exception => 
@@ -89,52 +75,26 @@ object CaliperRunner {
     }
   }
 
-  def beforeMeasurement(index:Int, total:Int, scenario:Scenario) = {
-    val percentDone:Double = index.toDouble / total
-//    println("%2.0f%% %s".format(percentDone * 100, scenario))
+  def beforeMeasurement(index:Int, total:Int, benchmarkName:String) = {
+    val percentDone:Double = (index.toDouble / total)*100
+    print(s"${percentDone.toInt}% $benchmarkName - ")
   }
 
-  def afterMeasurement(memoryMeasured:Boolean, scenarioResult:ScenarioResult) = {
+  def afterMeasurement(result:BenchmarkResult) = {
     val memoryMeasurements = ""
-    if (memoryMeasured) {
-      val instanceMeasurementSet:MeasurementSet =
-        scenarioResult.getMeasurementSet(MeasurementType.INSTANCE)
-      val instanceUnit:String = ConsoleReport.UNIT_ORDERING.min(instanceMeasurementSet.getUnitNames().entrySet()).getKey()
-      val memoryMeasurementSet:MeasurementSet = scenarioResult.getMeasurementSet(MeasurementType.MEMORY)
-      val memoryUnit:String = ConsoleReport.UNIT_ORDERING.min(memoryMeasurementSet.getUnitNames().entrySet()).getKey()
-      val memoryMeasurements = ", allocated %s%s for a total of %s%s".format(
-                                         Math.round(instanceMeasurementSet.medianUnits()), instanceUnit,
-                                         Math.round(memoryMeasurementSet.medianUnits()), memoryUnit)
-    }
 
-    val timeMeasurementSet:MeasurementSet = scenarioResult.getMeasurementSet(MeasurementType.TIME)
+    val timeMeasurementSet:MeasurementSet = result.measurementSet
     val unit:String = ConsoleReport.UNIT_ORDERING.min(timeMeasurementSet.getUnitNames().entrySet()).getKey()
+    println(s"  done.")
     // println(" %.2f %s; \u03C3=%.2f %s @ %d trials%s%n".format(timeMeasurementSet.medianUnits(),
     //                   unit, timeMeasurementSet.standardDeviationUnits(), unit,
     //                   timeMeasurementSet.getMeasurements().size(), memoryMeasurements))
   }
 
-  def runScenario(arguments:Arguments, scenarioSelection:ScenarioSelection, scenario:Scenario):ScenarioResult = {
-    val timeMeasurementResult:MeasurementResult = SetupRunner.measure(CaliperSetup(arguments, scenarioSelection, scenario, MeasurementType.TIME))
+  def runScenario(setup:CaliperSetup,benchmarkName:String):BenchmarkResult = {
+    val timeMeasurementResult:MeasurementResult = SetupRunner.measure(setup,benchmarkName)
 
-    var allocationMeasurements:MeasurementSet = null
-    var allocationEventLog:String = null
-    var memoryMeasurements:MeasurementSet = null
-    var memoryEventLog:String = null
-
-    if (arguments.getMeasureMemory()) {
-      val allocationsMeasurementResult:MeasurementResult = SetupRunner.measure(CaliperSetup(arguments, scenarioSelection, scenario, MeasurementType.INSTANCE))
-      allocationMeasurements = allocationsMeasurementResult.measurements
-      allocationEventLog = allocationsMeasurementResult.eventLogs
-
-      val memoryMeasurementResult:MeasurementResult = SetupRunner.measure(CaliperSetup(arguments, scenarioSelection, scenario, MeasurementType.MEMORY))
-      memoryMeasurements = memoryMeasurementResult.measurements
-      memoryEventLog = memoryMeasurementResult.eventLogs
-    }
-
-    return new ScenarioResult(timeMeasurementResult.measurements,
-        timeMeasurementResult.eventLogs,
-        allocationMeasurements, allocationEventLog,
-        memoryMeasurements, memoryEventLog)
+    return new BenchmarkResult(timeMeasurementResult.measurements,
+                               timeMeasurementResult.eventLogs)
   }
 }

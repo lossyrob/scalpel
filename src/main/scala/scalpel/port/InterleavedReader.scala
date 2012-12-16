@@ -1,7 +1,11 @@
 package scalpel.port
 
+object InterProc {
+  val jsonMarker = "//ZxJ/"
+}
+
 trait InterleavedReader {
-  val marker = "//ZxJ/"
+  lazy val marker = InterProc.jsonMarker
   
   def log(s:String):Unit
 

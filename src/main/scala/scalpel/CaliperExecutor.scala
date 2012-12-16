@@ -9,9 +9,14 @@ class CaliperExecutor() extends scalameter.Executor {
     translate(setup)
   }
 
-  def runSetup[T](setup: scalameter.Setup[T]): scalameter.CurveData = {
+  def runSetup[T](smSetup: scalameter.Setup[T]): scalameter.CurveData = {
     println("[TRANSLATION]: SETUP")
-    setup |> translateSetup |> port.SetupRunner.measure |> translateData
+    val setup = smSetup |> translateSetup
+    val results = for(name <- setup.benchmarkNames) yield {
+      port.SetupRunner.measure(setup,name) |> translateData
+    }
+
+    results(0) // Need to run multiple
   }
 
   def translateData(measurementResult:port.MeasurementResult):scalameter.CurveData = {
