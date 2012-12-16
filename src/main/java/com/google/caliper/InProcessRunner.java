@@ -45,7 +45,6 @@ final public class InProcessRunner {
       }
       Scenario scenario = scenarios.get(0);
 
-      System.out.println("starting " + scenario);
       MeasurementSet measurementSet = run(scenarioSelection, scenario, measurer);
       System.out.println(arguments.getMarker() + Json.measurementSetToJson(measurementSet));
     } catch (UserException e) {

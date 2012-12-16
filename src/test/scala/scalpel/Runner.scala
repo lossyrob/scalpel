@@ -17,3 +17,14 @@ class RunSM extends FunSpec with ShouldMatchers {
 class RunScalpel extends FunSpec with ShouldMatchers {
   describe("run scalpel") { it("runs") { ScalpelRunner.run() } }
 }
+
+@org.junit.runner.RunWith(classOf[org.scalatest.junit.JUnitRunner])
+class TestProcess extends FunSpec {
+  describe("whatever") {
+    it("does stuff") {
+      import sys.process._
+      
+      "ls" :: "-l" :: Nil ! ProcessLogger { s => println(s"\n[Got] ${s}") }
+    }
+  }
+}

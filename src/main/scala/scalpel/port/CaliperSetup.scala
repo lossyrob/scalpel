@@ -8,7 +8,9 @@ import scala.collection.JavaConversions._
 /* Caliper data type */
 
 case class CaliperSetup(arguments:Arguments,scenarioSelection:ScenarioSelection,
-                        scenario:Scenario,measurementType:MeasurementType)
+                        scenario:Scenario,measurementType:MeasurementType) {
+  def suiteClassName = arguments.getSuiteClassName()
+}
 
 object CaliperSetup {
   val Default = defaultCaliperSetup

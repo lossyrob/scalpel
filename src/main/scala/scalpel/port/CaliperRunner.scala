@@ -3,7 +3,6 @@ package scalpel.port
 import com.google.caliper._
 import com.google.caliper.ConsoleReport
 import com.google.caliper.UserException.ExceptionFromUserCodeException
-import com.google.caliper.util.InterleavedReader
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableList
 import com.google.common.base.Splitter
